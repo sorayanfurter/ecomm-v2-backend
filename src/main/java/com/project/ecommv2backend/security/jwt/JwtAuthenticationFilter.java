@@ -44,9 +44,11 @@ import java.util.Optional;
                 Optional<LocalUser> opUser = localUserRepository.findByEmailIgnoreCase(email);
                 if (opUser.isPresent()) {
                     LocalUser user = opUser.get();
-                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    if(user.isEmailVerified()){
+                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                    }
                 }
             } catch (JWTDecodeException ex) {
 

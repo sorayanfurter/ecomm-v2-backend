@@ -1,12 +1,7 @@
 package com.project.ecommv2backend.service;
 
-import com.project.ecommv2backend.exception.EmailFailureException;
-import com.project.ecommv2backend.exception.UserAlreadyExistsException;
-import com.project.ecommv2backend.exception.UserNotVerifiedException;
-import com.project.ecommv2backend.model.ERole;
-import com.project.ecommv2backend.model.LocalUser;
-import com.project.ecommv2backend.model.Role;
-import com.project.ecommv2backend.model.VerificationToken;
+import com.project.ecommv2backend.exception.*;
+import com.project.ecommv2backend.model.*;
 import com.project.ecommv2backend.model.dto.LocalUserDTO;
 import com.project.ecommv2backend.repository.LocalUserRepository;
 import com.project.ecommv2backend.repository.RoleRepository;
@@ -18,6 +13,8 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -55,8 +52,8 @@ public class UserServiceImpl {
      * @throws UserAlreadyExistsException Thrown if there is already a user with the given information.
      */
 
-    public LocalUserDTO registerNewUser(@Valid UserRegistrationDTO userRegistrationDTO) throws UserAlreadyExistsException, EmailFailureException {
-        if(localUserRepository.findUserByEmail(userRegistrationDTO.getEmail()).isPresent()){
+    public LocalUserDTO registerNewUser(UserRegistrationDTO userRegistrationDTO) throws UserAlreadyExistsException, EmailFailureException {
+        if(localUserRepository.findUserByEmail(userRegistrationDTO.getEmail()).isPresent() || localUserRepository.findByUsernameIgnoreCase(userRegistrationDTO.getUsername()).isPresent()){
             throw new UserAlreadyExistsException();
         }
         LocalUser user = mapper.map(userRegistrationDTO, LocalUser.class);
@@ -67,7 +64,7 @@ public class UserServiceImpl {
         // Encode password
         user.setPassword(encryptionService.encryptPassword(userRegistrationDTO.getPassword()));
         // Set role to user
-        Role role = roleRepository.findRoleByName(ERole.USER).get();
+        Role role = roleRepository. findRoleByName(ERole.USER).get();
         Set<Role> roleSet = new HashSet<>();
         roleSet.add(role);
         user.setRoles(roleSet);
@@ -126,6 +123,23 @@ public class UserServiceImpl {
         return false;
     }
 
+    public void resetPassword(PasswordResetBody body){
+        String email = jwtService.getResetPasswordEmail(body.getToken());
+        Optional<LocalUser> opUser = localUserRepository.findByEmailIgnoreCase(email);
+        if(opUser.isPresent()){
+            LocalUser user = opUser.get();
+            user.setPassword(encryptionService.encryptPassword(body.getPassword()));
+            localUserRepository.save(user);
+        }
+    }
+
+    public void forgotPassword(String email) throws EmailFailureException {
+        LocalUser user = localUserRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(()-> new EmailNotFoundException("Email has not been found"));
+            String token = jwtService.generatePasswordResetJWT(user);
+            emailService.sendPasswordResetEmail(user, token);
+
+    }
 
 
 }

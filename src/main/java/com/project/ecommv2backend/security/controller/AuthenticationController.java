@@ -2,8 +2,10 @@ package com.project.ecommv2backend.security.controller;
 
 
 import com.project.ecommv2backend.exception.EmailFailureException;
+import com.project.ecommv2backend.exception.EmailNotFoundException;
 import com.project.ecommv2backend.exception.UserNotVerifiedException;
 import com.project.ecommv2backend.model.LocalUser;
+import com.project.ecommv2backend.model.PasswordResetBody;
 import com.project.ecommv2backend.security.auth.AuthenticationRequest;
 import com.project.ecommv2backend.security.auth.AuthenticationResponse;
 import com.project.ecommv2backend.service.UserServiceImpl;
@@ -65,16 +67,23 @@ public class AuthenticationController {
     public LocalUser getLoggedInUserProfile(@AuthenticationPrincipal LocalUser user){
         return user;
     }
-/*
-    @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
-        return ResponseEntity.ok(authservice.authenticate(request));
+
+    @PostMapping("/forgot")
+    public ResponseEntity forgotPassword(@RequestParam String email){
+    try{ userService.forgotPassword(email);
+    return ResponseEntity.ok().build();
+    } catch (EmailNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    } catch (EmailFailureException ex){
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
     }
 
-    @GetMapping ("/me")
-    public LocalUser getLoggedInUserProfile (@AuthenticationPrincipal LocalUser user){
-        return user;
-    }*/
+    @PostMapping("/reset")
 
+    public ResponseEntity resetPassword(@Valid @RequestBody PasswordResetBody body){
+        userService.resetPassword(body);
+        return ResponseEntity.ok().build();
+    }
 
 }

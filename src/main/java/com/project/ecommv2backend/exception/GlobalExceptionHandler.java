@@ -24,4 +24,12 @@ public class GlobalExceptionHandler {
         ErrorDetails error = ErrorDetails.builder().status("404").message(ex.getMessage()).build();
         return new ResponseEntity<ErrorDetails>(error, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler (UserDoesNotHavePermission.class)
+
+    public ResponseEntity<ErrorDetails> UserDoesNotHavePermission(UserDoesNotHavePermission ex){
+        ErrorDetails error = ErrorDetails.builder().status("401").message(ex.getMessage()).build();
+        return new ResponseEntity<ErrorDetails>(error, HttpStatus.UNAUTHORIZED);
+    }
+
 }

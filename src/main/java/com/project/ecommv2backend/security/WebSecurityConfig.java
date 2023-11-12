@@ -32,7 +32,7 @@ public class WebSecurityConfig {
                 .csrf(config -> config.disable())
                 .addFilterBefore(jwtAuthenticationFilter, AuthorizationFilter.class)
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/products/","/register", "/auth/login", "/auth/verify").permitAll()
+                    auth.requestMatchers("/products/","/user/register", "/auth/login", "/auth/verify", "/auth/forgot", "/auth/reset").permitAll()
                     .anyRequest().authenticated();
 
                 });

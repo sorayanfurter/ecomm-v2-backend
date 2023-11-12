@@ -2,23 +2,32 @@ package com.project.ecommv2backend.controller;
 
 import com.project.ecommv2backend.exception.EmailFailureException;
 import com.project.ecommv2backend.exception.UserAlreadyExistsException;
+import com.project.ecommv2backend.exception.UserDoesNotHavePermission;
+import com.project.ecommv2backend.model.Address;
+import com.project.ecommv2backend.model.LocalUser;
 import com.project.ecommv2backend.model.dto.LocalUserDTO;
+import com.project.ecommv2backend.repository.AddressRepository;
 import com.project.ecommv2backend.security.model.UserRegistrationDTO;
 import com.project.ecommv2backend.service.UserServiceImpl;
-import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
+@RequestMapping("/user")
 public class UserController {
 
     @Autowired
     UserServiceImpl userService;
+    @Autowired
+    private AddressRepository addressRepository;
 
     @PostMapping("/register")
 
@@ -32,6 +41,9 @@ public class UserController {
                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
            }
     }
+
+
+
 
 
 }

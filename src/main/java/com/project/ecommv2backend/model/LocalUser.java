@@ -44,7 +44,7 @@ public class LocalUser implements UserDetails{
     @ManyToMany(fetch = FetchType.EAGER, targetEntity = Role.class, cascade = CascadeType.PERSIST)
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))//Eager trae todos los roles que estan asociados a ese usuario, no uno por uno como lazy
     private Set<Role> roles;
-
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("id desc")
     private List<VerificationToken> verificationTokens = new ArrayList<>();
@@ -56,6 +56,7 @@ public class LocalUser implements UserDetails{
         return emailVerified;
     }
 
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> authorities = new HashSet<>();
@@ -74,7 +75,7 @@ public class LocalUser implements UserDetails{
     public boolean isAccountNonExpired() {
         return true;
     }
-@JsonIgnore
+    @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
         return true;
